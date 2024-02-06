@@ -1,0 +1,213 @@
+//Christine Ng
+//02/05/2024
+//This class models a todo list manager which allows user to add TODOs, mark TODOs as completed 
+//and save and load TODOs to and from a file based on user's input.
+import java.util.*;
+import java.io.*;
+
+public class Todolist-manager {
+
+    public static void main(String[] args) throws FileNotFoundException {
+        List<String> todos = new ArrayList<String>();
+        Scanner console = new Scanner(System.in);
+        Map<String, String> listName = new TreeMap<>();
+        System.out.println("Welcome to your TODO List Manager!");
+        System.out.println("Would you like to name your list?");
+        System.out.println("(Y)es, (N)o");
+        String newList = console.nextLine();
+        
+        String list = "";
+        if(newList.equalsIgnoreCase("Y")){
+            list = newList(console, listName);
+        }
+
+        System.out.println("What would you like to do?");
+        System.out.print("(A)dd TODO, (M)ark TODO as done, (L)oad TODOs, " + 
+                            "(S)ave TODOs, (Q)uit? ");
+        String action = console.nextLine();
+
+        while(!action.equalsIgnoreCase("Q")){
+            if(action.equalsIgnoreCase("A")){
+                addItem(console, todos);
+            } else if (action.equalsIgnoreCase("M")){
+                markItemAsDone(console, todos);
+            } else if (action.equalsIgnoreCase("L")){
+                loadItems(console, todos, listName, list);
+            } else if (action.equalsIgnoreCase("S")){
+                saveItems(console, todos, listName, list);
+            } else {
+                System.out.println("Unknown input: " + action);
+            }
+
+            printTodos(todos);
+
+            System.out.println();
+            System.out.println("What would you like to do?");
+            System.out.print("(A)dd TODO, (M)ark TODO as done, (L)oad TODOs, "
+                                + "(S)ave TODOs, (Q)uit? ");
+            action = console.nextLine();
+        }
+    }
+
+    public static String newList(Scanner console, Map<String, String> listName){
+        System.out.println("What is the name of your new todo-list?");
+        String newListName = console.nextLine();
+        if(listName.containsKey(newListName)){
+            System.out.println("The list already exist. Would you like to ");
+            System.out.println("(R)eplace it completely,");
+            System.out.println("or press any key to enter a new name");
+            String replace = console.nextLine();
+            if(!replace.equalsIgnoreCase("R")){
+                System.out.println("What is the name of your list?");
+                newListName = console.nextLine();
+            }
+        }
+        System.out.println("Please enter your file name: ");
+        String fileName = console.nextLine();
+        while(!fileName.contains(".txt")){
+            System.out.print("Invalid file name. Please enter again in the format of \".txt\": ");
+            fileName = console.nextLine();
+        }
+        listName.put(newListName, fileName);
+        System.out.println();
+        return newListName;
+    }
+
+    //This method prints out the items that are on the todo list with numeric order.
+    //When todo list is empty, a message will be printed to tell user that the list is empty.
+    //Parameter:
+    //  List<String> todos - the ArrayList that represents the todo list.
+    public static void printTodos(List<String> todos) {
+        System.out.println("Today's TODOs:");
+        if(todos.size() == 0){
+            System.out.println("You have nothing to do yet today! Relax!");
+        } else {
+            for (int i = 0; i < todos.size(); i++){
+                System.out.println("  " + (i + 1) + ": " + todos.get(i));
+            }
+        }
+    }
+
+    //This method allows user to add items onto the todo list. When the extension is enabled,
+    //user can add multiple items into the todo list in chosen position and view the todo list 
+    //if they wish to when choosing the position to add an item.
+    //Parameter:
+    //  Scanner console - used to read user's input
+    //  List<String> todos - the ArrayList that represents the todo list.
+    public static void addItem(Scanner console, List<String> todos) {
+        int numItems = 1;
+        System.out.print("Enter the number of items you would like to add: ");
+        numItems = Integer.parseInt(console.nextLine());
+
+        for(int i = 0; i < numItems; i++){
+            System.out.print("What would you like to add? ");
+            String addTodos = console.nextLine();
+            int order = 0;
+            if(todos.size() != 0){
+                System.out.print("Where in the list should it be (1-" + (todos.size() + 1)
+                    + ")? (Enter for end): ");
+                System.out.println();
+                System.out.println("[Enter \"V\" to view the todo list]");
+                String orderInputted = console.nextLine();
+
+                if(orderInputted.equalsIgnoreCase("V")){
+                    printTodos(todos);
+                    System.out.print("Where in the list should it be (1-" + (todos.size() + 1)
+                        + ")? (Enter for end): ");
+                    orderInputted = console.nextLine();
+                }
+
+                if (orderInputted.length() != 0){
+                    order = Integer.parseInt(orderInputted) - 1;
+                } else {
+                    order = todos.size();
+                }
+            }
+            todos.add(order, addTodos);
+        }
+
+    }
+
+    //This method ask user's for corresponding index of a todo item or name of the item when 
+    //extension feature is enabled, and marks items as done by removing items from the todos list.
+    //When todo list is empty, a message will be printed to tell user that the list is empty.
+    //Parameter:
+    //  Scanner console - used to read user's input
+    //  List<String> todos - the ArrayList that represents the todo list.
+    public static void markItemAsDone(Scanner console, List<String> todos) {
+        if (todos.size() == 0){
+            System.out.println("All done! Nothing left to mark as done!");
+        } else {
+            
+                System.out.print("Enter the name of the item: ");
+                String targetItem = console.nextLine();
+                int itemIndex = todos.indexOf(targetItem);
+
+                while(itemIndex == -1){
+                    System.out.println("todo \"" + targetItem + "\" not found. ");
+                    System.out.print("Please try again. Enter the name of the item: ");
+                    targetItem = console.nextLine();
+                    itemIndex = todos.indexOf(targetItem);
+                }
+
+                todos.remove(itemIndex);
+                System.out.println("\"" + targetItem + "\" is marked done");
+                
+        }
+    }
+
+    //This method asks user for name of the file and loads the todos from the file, 
+    //completely replacing the previous todo list.
+    //Parameter:
+    //  Scanner console - used to read user's input
+    //  List<String> todos - the ArrayList that represents the todo list.
+    public static void loadItems(Scanner console, List<String> todos, Map<String, String> listName,
+                                String list) throws FileNotFoundException {
+        if(listName.isEmpty()){
+            System.out.println("You don't have a list yet. Let's start building or saving one!");
+            System.out.println();
+            return;
+        }
+        System.out.println("Loading new todo list will completely replace current todo list.");
+        System.out.println("Would you like to save current todos first? (Y)es, (N)o");
+        String save = console.nextLine();
+        if(save.equalsIgnoreCase("Y")){
+            saveItems(console, todos, listName, list);
+        }
+        
+        System.out.print("Please enter the name of the list you would like to load: ");
+        String newListName = console.nextLine();
+        String fileName = listName.get(listName);
+        Scanner fileScan = new Scanner(new File(fileName));
+        todos.clear();
+        while(fileScan.hasNextLine()){
+            String fileTodos = fileScan.nextLine();
+            todos.add(fileTodos);
+        }
+    }
+
+    //This method asks user for name of the file and saves the current todo list to the file,
+    //Parameter:
+    //  Scanner console - used to read user's input
+    //  List<String> todos - the ArrayList that represents the todo list
+    //
+    public static void saveItems(Scanner console, List<String> todos, Map<String, String> listName,
+                                String list) throws FileNotFoundException {
+        System.out.println("Would you like to save your todos to a new list?");
+        System.out.println("(Y)es, (N)o");
+        String newList = console.nextLine();
+        String fileName = "";
+        if(listName.isEmpty() || newList.equalsIgnoreCase("Y")){
+            newList(console, listName);
+        } else {
+            fileName = listName.get(list);
+        }
+        
+        PrintStream todosFile = new PrintStream(new File(fileName));
+        for (int i = 0; i < todos.size(); i++){
+            String todo = todos.get(i);
+            todosFile.println(todo);
+        }
+        
+    }
+}
