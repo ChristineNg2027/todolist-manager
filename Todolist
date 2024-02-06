@@ -5,7 +5,7 @@
 import java.util.*;
 import java.io.*;
 
-public class Todolist-manager {
+public class TodoList {
 
     public static void main(String[] args) throws FileNotFoundException {
         List<String> todos = new ArrayList<String>();
@@ -49,6 +49,11 @@ public class Todolist-manager {
         }
     }
 
+    //This method creates a new todo-list and store its name and file into the Map listName
+    //Parameter:
+    //  Scanner console - used to read user's input
+    //  Map<String, String> listName - the TreeMap representing the names of 
+    //                                 todo-lists and their file name
     public static String newList(Scanner console, Map<String, String> listName){
         System.out.println("What is the name of your new todo-list?");
         String newListName = console.nextLine();
@@ -160,7 +165,10 @@ public class Todolist-manager {
     //completely replacing the previous todo list.
     //Parameter:
     //  Scanner console - used to read user's input
-    //  List<String> todos - the ArrayList that represents the todo list.
+    //  List<String> todos - the ArrayList that represents the todo list
+    //  Map<String, String> listName - the TreeMap representing the names of 
+    //                                 todo-lists and their file name
+    //  String list - the name of the current list
     public static void loadItems(Scanner console, List<String> todos, Map<String, String> listName,
                                 String list) throws FileNotFoundException {
         if(listName.isEmpty()){
@@ -176,7 +184,13 @@ public class Todolist-manager {
         }
         
         System.out.print("Please enter the name of the list you would like to load: ");
-        String newListName = console.nextLine();
+        System.out.println("[Enter \"V\" to view the saved list]");
+        String loadListName = console.nextLine();
+        if(loadListName.equalsIgnoreCase("V")){
+            System.out.println(listName.keySet());
+            System.out.print("Please enter the name of the list you would like to load: ");
+            loadListName = console.nextLine();
+        }
         String fileName = listName.get(listName);
         Scanner fileScan = new Scanner(new File(fileName));
         todos.clear();
@@ -190,7 +204,9 @@ public class Todolist-manager {
     //Parameter:
     //  Scanner console - used to read user's input
     //  List<String> todos - the ArrayList that represents the todo list
-    //
+    //  Map<String, String> listName - the TreeMap representing the names of 
+    //                                 todo-lists and their file name
+    //  String list - the name of the current list
     public static void saveItems(Scanner console, List<String> todos, Map<String, String> listName,
                                 String list) throws FileNotFoundException {
         System.out.println("Would you like to save your todos to a new list?");
